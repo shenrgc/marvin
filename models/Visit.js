@@ -8,13 +8,13 @@ var visitSchema = new Schema({
     updatedAt: Date
 });
 
-visitSchema.static('findByIp', function(visitorIp, callback) {
+visitSchema.statics.findByIp = function(visitorIp, callback) {
     return this.find({ ip: visitorIp }, callback);
-});
+};
 
-visitSchema.static('incrementHits', function(visitorIp, callback) {
+visitSchema.statics.incrementHits = function(visitorIp, callback) {
     return this.findOneAndUpdate({ ip: visitorIp }, { $inc : { hits: 1 }, updatedAt: new Date() }, callback);
-});
+};
 
 //Trigger before save
 visitSchema.pre('save', function(next) {

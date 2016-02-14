@@ -2,7 +2,7 @@ var express = require('express'),
   router = express.Router(),
   moment = require('moment'),
   db = require('../config/mongoose'),
-  Visit = db().model('Visit');
+  Visit = require('../models').Visit;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -11,7 +11,36 @@ router.get('/', function(req, res, next) {
 
 router.get('/mongo', function(req, res, next) {
   var mongo = process.env.MONGO_URL || 'NADA';
-  res.render('index', { title: mongo });
+  res.render('index', { title: 'LOL' });
+});
+
+router.get('/test', function(req, res, next) {
+  var visit = new Visit({
+    ip: '123.123.123.123',
+    hits: 123,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  });
+
+  visit.save(function (err, visit) {
+    if (err) console.log(err);
+
+    console.log("SUCCESS");
+    console.log(visit);
+    res.send("A - OK");
+  });
+});
+
+router.get('/crap', function(req, res, next) {
+  Visit.find({}, function(err, list) {
+    if (err) console.log(err);
+
+    console.log("LOOOL");
+    console.log(list.length);
+    console.log(list);
+
+    res.send("OK");
+  });
 });
 
 router.get('/hits', function(req, res, next) {
