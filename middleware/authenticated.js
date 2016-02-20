@@ -1,6 +1,6 @@
-var config = require('../config'),
-	response = require('../utils').response,
-	jwt = require('jsonwebtoken');
+var config = require('../config');
+var response = require('../utils').response;
+var jwt = require('jsonwebtoken');
 
 module.exports = function(req, res, next) {
 	// check header or url parameters or post parameters for token

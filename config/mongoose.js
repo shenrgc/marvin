@@ -9,7 +9,8 @@ module.exports = function() {
     });
 
 	require('../models/User');
-    require('../models/Visit');
+    require('../models/Team');
+    require('../models/Message');
 
     return db;
 };

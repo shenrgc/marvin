@@ -1,37 +1,15 @@
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema,
-	bcrypt = require('bcrypt-nodejs');
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var bcrypt = require('bcrypt-nodejs');
 
 var userSchema = new Schema({
-
 	/* Auth Data */
-	local : {
-        password : String
-    },
-    facebook : {
-        id : String,
-        token : String
-    },
-    twitter : {
-        id : String,
-        token : String,
-        displayName : String,
-        username : String
-    },
-    google : {
-        id : String,
-        token : String
-    },
+	password : String
 
 	/* Data */
 	name : String,
 	email : String,
-	avatar : String,
-	biography : String,
-	birthday : Date,
-	gender : String,
-	phone : String,
-
+	
     createdAt: Date,
     updatedAt: Date
 });
@@ -43,7 +21,7 @@ userSchema.methods.generateHash = function(password) {
 
 // checking if password is valid
 userSchema.methods.validPassword = function(password) {
-    return bcrypt.compareSync(password, this.local.password);
+    return bcrypt.compareSync(password, this.password);
 };
 
 //Trigger before save
