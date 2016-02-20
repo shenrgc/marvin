@@ -4,7 +4,7 @@ var bcrypt = require('bcrypt-nodejs');
 
 var userSchema = new Schema({
 	/* Auth Data */
-	password : String
+	password : String,
 
 	/* Data */
 	name : String,
@@ -21,6 +21,8 @@ userSchema.methods.generateHash = function(password) {
 
 // checking if password is valid
 userSchema.methods.validPassword = function(password) {
+    console.log(this.generateHash(password));
+    console.log(this);
     return bcrypt.compareSync(password, this.password);
 };
 

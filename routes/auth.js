@@ -17,6 +17,7 @@ router.post('/email', function(req, res, next) {
 	}).exec();
 
 	query.then(function(user) {
+		console.log(user);
 		if (!user) {
 			res.json(response.error(response.errorTypes.userNotFound));
 		} else if (user.password) {

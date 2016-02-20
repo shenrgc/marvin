@@ -4,10 +4,9 @@ var Schema = mongoose.Schema;
 var teamSchema = new Schema({
 	/* Data */
 	name : String,
-	admins: [],
-	users: [],
-	remainders: [];
-	
+	users: [String],
+	remainders: [],
+	messagesReadBy: [String],
     createdAt: Date,
     updatedAt: Date
 });
