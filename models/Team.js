@@ -5,8 +5,9 @@ var teamSchema = new Schema({
 	/* Data */
 	name : String,
 	users: [String],
-	remainders: [],
+	reminders: [],
 	messagesReadBy: [String],
+    miniMarvinId: String,
     createdAt: Date,
     updatedAt: Date
 });
