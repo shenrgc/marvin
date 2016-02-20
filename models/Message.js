@@ -5,7 +5,8 @@ var messageSchema = new Schema({
 	/* Data */
 	teamId : String,
 	from: String,			//userId who posted message
-		
+	text: String,
+
     createdAt: Date,
     updatedAt: Date
 });

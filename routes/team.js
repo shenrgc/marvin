@@ -211,23 +211,72 @@ router.delete('/:id/reminder', authenticated, function(req, res, next) {
 
 // Reminders
 
-// Add new user to a team
+
 router.post('/:id/user', authenticated, function(req, res, next) {
 	if(req.body.email) {
+		var userId;
 		var query = User.findOne({ 'email' : req.body.email }).exec();
 
 		query.then(function(user) {
 			if(user) {
-				var query2 = User.findOne({ '_id' : req.params.id }).exec();
-			} 
-			else {
+				userId = user._id;
+				return Team.findOne({ '_id' : req.params.id }).exec();
+			} else {
 				res.json(response.error(response.errorTypes.notFound));
 			}
-		});
-	}
-	else {
-		res.json(response.error(response.errorTypes.incorrectParameters));
-	}
+ 		}).then(function (team) {
+ 			if(team.users.indexOf(userId) !== -1) res.json(response.error(response.errorTypes.incorrectParameters));
+ 			else {
+ 				if(team.users[0] === req.decoded._doc._id) {
+					team.users.push(userId);
+					team.save().then(function(team) {
+						res.json(response.success({'_id': team._id, 'name': team.name, 'users': team.users}));
+					});
+				}
+				else {
+					res.json(response.error(response.errorTypes.accessDenied));
+				}
+			}
+ 		}).catch(function(err) {
+ 			console.log(err);
+			res.json(response.error(response.errorTypes.internalServerError));
+ 		});
+ 	} else {
+ 		res.json(response.error(response.errorTypes.incorrectParameters));
+ 	}
+});
+
+// Delete user from a team
+router.delete('/:id/user', authenticated, function(req, res, next) {
+	if(req.body._id) {
+		var query = User.findOne({ '_id' : req.body._id }).exec();
+
+		query.then(function(user) {
+			if(user) {
+				return Team.findOne({ '_id' : req.params.id }).exec();
+			} else {
+				res.json(response.error(response.errorTypes.notFound));
+			}
+ 		}).then(function (team) {
+ 			if(team.users.indexOf(req.body._id) === -1) res.json(response.error(response.errorTypes.notFound));
+ 			else {
+	 			if((team.users[0] === req.decoded._doc._id || req.body._id === req.decoded._doc._id) && team.users.length > 1) {
+					team.users.splice(team.users.indexOf(req.body._id), 1);
+					team.save().then(function(team) {
+						res.json(response.success({'_id': team._id, 'name': team.name, 'users': team.users}));
+					});
+				}
+				else {
+					res.json(response.error(response.errorTypes.accessDenied));
+				}
+			}
+ 		}).catch(function(err) {
+ 			console.log(err);
+			res.json(response.error(response.errorTypes.internalServerError));
+ 		});
+ 	} else {
+ 		res.json(response.error(response.errorTypes.incorrectParameters));
+ 	}
 });
 
 module.exports = router;

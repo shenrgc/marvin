@@ -31,16 +31,28 @@ router.get('/:id', authenticated, function(req, res, next) {
 
 // New user in Marvin
 router.post('/', function(req, res, next) {
-	var user = new User({
-		/* Data */
-		name: req.body.name,
-		email : req.body.email
-	});
-	user.password = user.generateHash(req.body.password);
+	var query = User.findOne({ 'email' : req.body.email }).select('-password').exec();
 
-	console.log(user);
-	user.save().then(function(user) {
-		res.json(response.success({'_id': user._id, 'name': user.name, 'email': user.email}));
+	query.then(function(user) {
+		if(user) {
+			res.json(response.error(response.errorTypes.incorrectParameters));
+		}
+		else {
+			var user = new User({
+				/* Data */
+				name: req.body.name,
+				email : req.body.email
+			});
+			user.password = user.generateHash(req.body.password);
+
+			console.log(user);
+			user.save().then(function(user) {
+				res.json(response.success({'_id': user._id, 'name': user.name, 'email': user.email}));
+			}).catch(function(err) {
+				console.log(err);
+				res.json(response.error(response.errorTypes.internalServerError));
+			});
+		}
 	}).catch(function(err) {
 		console.log(err);
 		res.json(response.error(response.errorTypes.internalServerError));
