@@ -26,7 +26,8 @@ router.get('/:id', authenticated, function(req, res, next) {
 	var query = Team.findOne({ '_id' : req.params.id }).exec();
 
 	query.then(function(team) {
-		res.json(response.success(team));
+		if(team) res.json(response.success(team));
+		res.json(response.error(response.errorTypes.notFound));
 	}).catch(function(err) {
 		console.log(err);
 		res.json(response.error(response.errorTypes.internalServerError));
@@ -213,30 +214,14 @@ router.delete('/:id/reminder', authenticated, function(req, res, next) {
 // Add new user to a team
 router.post('/:id/user', authenticated, function(req, res, next) {
 	if(req.body.email) {
-		var query = User.findOne({ '_id' : req.params.id }).exec();
+		var query = User.findOne({ 'email' : req.body.email }).exec();
 
-		query.then(function(team) {
-			var reminder = {
-				'title': req.body.title,
-				'type': req.body.type,
-				'triggerTime': null,
-				'chill': req.body.chill,
-				'active': req.body.active
-			};
-			var repeated = false;
-			for(var i = 0; i < team.reminders.length && !repeated; ++i) {
-				if(team.reminders[i].title === req.body.title) repeated = true;
-			}
-
-			if(repeated) res.json(response.error(response.errorTypes.incorrectParameters));
+		query.then(function(user) {
+			if(user) {
+				var query2 = User.findOne({ '_id' : req.params.id }).exec();
+			} 
 			else {
-				team.reminders.push(reminder);
-				team.save().then(function(team) {
-					res.json(response.success({'_id': team._id, 'name': team.name, 'reminders': team.reminders}));
-				}).catch(function(err) {
-					console.log(err);
-					res.json(response.error(response.errorTypes.internalServerError));
-				});
+				res.json(response.error(response.errorTypes.notFound));
 			}
 		});
 	}
