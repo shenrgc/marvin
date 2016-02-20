@@ -1,6 +1,7 @@
 var config = require('../config');
 var router = require('express').Router();
 var jwt = require('jsonwebtoken');
+var User = require('../models').User;
 var Team = require('../models').Team;
 var authenticated = require('../middleware').authenticated;
 var response = require('../utils').response;
@@ -147,16 +148,24 @@ router.post('/:id/reminder', authenticated, function(req, res, next) {
 router.put('/:id/reminder', authenticated, function(req, res, next) {
 	if(req.params.id) {
 		var query = Team.findOne({ '_id' : req.params.id }).exec();
-
 		query.then(function(team) {
 			var n = team.reminders.length;
 			var i = 0;
 			while(i < n && team.reminders[i].title !== req.body.title) ++i;
 			if(i === n) res.json(response.error(response.errorTypes.incorrectParameters));
 			else {
-				if(req.body.type) team.reminders[i].type = req.body.type;
-				if(req.body.chill) team.reminders[i].chill = req.body.chill;
-				if(req.body.active) team.reminders[i].active = req.body.active;
+				var reminder = {
+					'title': team.reminders[i].title,
+					'type': team.reminders[i].type,
+					'triggerTime': team.reminders[i].triggerTime,
+					'chill': team.reminders[i].chill,
+					'active': team.reminders[i].active
+				};
+				team.reminders.splice(i, 1);
+				if(req.body.type) reminder.type = req.body.type;
+				if(req.body.chill) reminder.chill = req.body.chill;
+				if(req.body.active) reminder.active = req.body.active;
+				team.reminders.push(reminder);
 				team.save().then(function(team) {
 					res.json(response.success({'_id': team._id, 'name': team.name, 'reminders': team.reminders}));
 				}).catch(function(err) {
@@ -171,6 +180,7 @@ router.put('/:id/reminder', authenticated, function(req, res, next) {
 	}
 });
 
+// Delete reminder from a team
 router.delete('/:id/reminder', authenticated, function(req, res, next) {
 	if(req.params.id) {
 
@@ -196,6 +206,43 @@ router.delete('/:id/reminder', authenticated, function(req, res, next) {
 	else {
 		res.json(response.error(response.errorTypes.incorrectParameters));
 	}	
+});
+
+// Reminders
+
+// Add new user to a team
+router.post('/:id/user', authenticated, function(req, res, next) {
+	if(req.body.email) {
+		var query = User.findOne({ '_id' : req.params.id }).exec();
+
+		query.then(function(team) {
+			var reminder = {
+				'title': req.body.title,
+				'type': req.body.type,
+				'triggerTime': null,
+				'chill': req.body.chill,
+				'active': req.body.active
+			};
+			var repeated = false;
+			for(var i = 0; i < team.reminders.length && !repeated; ++i) {
+				if(team.reminders[i].title === req.body.title) repeated = true;
+			}
+
+			if(repeated) res.json(response.error(response.errorTypes.incorrectParameters));
+			else {
+				team.reminders.push(reminder);
+				team.save().then(function(team) {
+					res.json(response.success({'_id': team._id, 'name': team.name, 'reminders': team.reminders}));
+				}).catch(function(err) {
+					console.log(err);
+					res.json(response.error(response.errorTypes.internalServerError));
+				});
+			}
+		});
+	}
+	else {
+		res.json(response.error(response.errorTypes.incorrectParameters));
+	}
 });
 
 module.exports = router;
