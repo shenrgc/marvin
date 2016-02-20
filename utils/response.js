@@ -20,13 +20,17 @@ function errorTypes() {
 			code : 403,
 			message : 'No token provided.'
 		},
-		userNotFound : {
+		notFound : {
 			code : 403,
-			message : 'User not found.'
+			message : 'Not found.'
 		},
 		wrongPassword : {
 			code : 403,
 			message : 'Wrong password.'
+		},
+		accessDenied : {
+			code : 403,
+			message : 'Access denied.'
 		},
 		internalServerError : {
 			code : 500,
