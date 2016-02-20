@@ -1,16 +1,13 @@
 var router = require('express').Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+// REST API
+router.use('/api/v1/auth', require('./auth.js'));
+router.use('/api/v1/user', require('./user.js'));
+router.use('/api/v1/team', require('./team.js'));
+router.use('/api/v1/action', require('./action.js'));
+router.use('/api/v1/message', require('./message.js'));
 
-router.use('/auth', require('./auth.js'));
-router.use('/user', require('./user.js'));
-router.use('/team', require('./team.js'));
-router.use('/action', require('./action.js'));
-router.use('/message', require('./message.js'));
-
-//router.use('/test', require('./test.js'));
+// WEB ROUTES
+router.use('/', require('./web.js'))
 
 module.exports = router;

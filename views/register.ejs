@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Register now in Marvin</title>
+    <% include ./partials/head %>
+    <link rel="stylesheet" href="/stylesheets/loginsignup.css">
+  </head>
+  <body>
+        <div class="container">
+          <img id="marvin" src="/images/marvin2.png">
+          <div class="card card-container">
+            <form class="form-signin" method="post" action="/users/signup">
+              <input type="text" id="inputName" class="form-control" placeholder="Name" name="name" required autofocus>
+              <input type="email" id="inputEmail" class="form-control" placeholder="Email" name="email" required autofocus>
+              <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
+              <button class="btn btn-lg btn-success btn-block btn-signin" type="submit" value="submit">Register now!</button>
+            </form>
+            <a href="/login" id='login' class="btn btn-lg btn-warning btn-block btn-signin" style="text-align='center'">Login</a>
+          </div>
+        </div>
+        <% include ./partials/footer %>
