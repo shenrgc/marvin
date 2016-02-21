@@ -1,26 +1,56 @@
 <!DOCTYPE html>
 <html>
-    <head>
-    	<title>Login in Marvin</title>
-          <% include ./partials/head %>
-          <link rel="stylesheet" href="/stylesheets/loginsignup.css">
-    </head>
-    <body>
-        <div class="container">
-          <div class="row">
-            <div class="col-xs-12 col-md-12 col-lg-12">
-              <img id="marvin" src="/images/marvin2.png">
-            </div>
-            <div class="col-xs-12 col-md-12 col-lg-12">
-              <div class="card card-container">
-                <form class="form-signin" method="post" action="/users/login">
-                  <input type="email" id="inputEmail" class="form-control" placeholder="Email" name="email" required autofocus>
-                  <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
-                  <button class="btn btn-lg btn-success btn-block btn-signin" type="submit" value="submit">Log In</button>
-                </form>
-                <a href="/register" id='signup' class="btn btn-lg btn-warning btn-block btn-signin" style="text-align='center'">Register now</a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <% include ./partials/footer %>
+  <head>
+  	<title>Login in Marvin</title>
+        <% include ./partials/head %>
+        <link rel="stylesheet" href="/stylesheets/loginsignup.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="card card-container">
+        <div id="form-title">Marvin Services</div>
+        <form class="form-signin" onSubmit="return getToken(email, password)">
+          <input type="email" id="inputEmail" class="form-control" placeholder="Email" name="email" required autofocus>
+          <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>
+          <button class="btn btn-lg btn-success btn-block btn-signin">Login</button>
+        </form>
+        <a id='signup' class="btn btn-lg btn-warning btn-block btn-signin" style="text-align='center'">Register now!</a>
+      </div>
+    </div>
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>  
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var token = "<%= token %>";
+      console.log(token);
+      function getToken(email, password) {
+        console.log(email.value);
+        alert('time starts now');
+        $.ajax ({
+          type: 'POST',
+          url: 'http://marvin.visualcosita.xyz/api/v1/auth/email',
+          dataType: 'jsonp',
+          data: {
+            "email": email.value,
+            "password": password.value
+          },
+          success: function (response){
+            if(response.token) {
+              alert('success');
+              token = response.token;
+              console.log(token);
+            }
+            else {
+              alert('failed');
+              location.reload();
+            }
+          },
+          error: function() {
+            alert('error');
+            location.reload();
+          }
+        });
+        return false;
+      }
+    </script>
+  </body>
+</html>

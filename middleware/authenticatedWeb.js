@@ -2,18 +2,23 @@ var config = require('../config');
 var response = require('../utils').response;
 var jwt = require('jsonwebtoken');
 
-module.exports = function(req) {
+module.exports = function(req, res, next) {
+	// check header or url parameters or post parameters for token
 	var token = req.body.token || req.params.token || req.headers['x-access-token'];
+
 	if (token) {
 		jwt.verify(token, config.secretHash, function(err, decoded) {
 			if (err) {
-				return false;
+				req.decoded = null;
+				next();
 			} else {
 				req.decoded = decoded;
-				return true;
+				req.decoded.token = token;
+				next();
 			}
 		});
 	} else {
-		return false;
+		req.decoded = null;
+		next();
 	}
 };
