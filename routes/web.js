@@ -13,6 +13,7 @@ router.get('/', authenticatedWeb, function(req, res) {
 
 // Login
 router.get('/login', authenticatedWeb, function(req, res) {
+	res.header('Access-Control-Allow-Origin', '*');
 	if(req.decoded) res.render('index', { 'token' : req.decoded.token, 'name': req.decoded.name});
 	else res.render('login', {'token':''});
 });

@@ -1,4 +1,23 @@
-var token;
+function getToken(name, email, password) {
+	$.ajax ({
+		type: 'POST',
+		url: '/register',
+		data: {
+			"name": name.value,
+			"email": email.value,
+			"password": password.value
+		},
+		success: function (response){
+			if(response.token) token = response.token;
+			else location.reload();
+		},
+		error: function() {
+			location.reload();
+		}
+	});
+	return false;
+}
+/*var token;
 
 $(document).ready(function(){
 	token = "";
@@ -46,4 +65,4 @@ function registerUser(name, email, password) {
 		}
 	});
 	return false;
-}
+}*/

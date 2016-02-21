@@ -21,36 +21,38 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
     <script type="text/javascript">
       var token = "<%= token %>";
-      console.log(token);
+
       function getToken(email, password) {
-        console.log(email.value);
-        alert('time starts now');
         $.ajax ({
           type: 'POST',
-          url: 'http://marvin.visualcosita.xyz/api/v1/auth/email',
-          dataType: 'jsonp',
+          url: '/getToken',
           data: {
             "email": email.value,
             "password": password.value
           },
-          success: function (response){
-            if(response.token) {
-              alert('success');
-              token = response.token;
-              console.log(token);
-            }
-            else {
-              alert('failed');
-              location.reload();
-            }
+          success: function(response){
+            if(response.token) token = response.token;
+            console.log(token);
           },
-          error: function() {
-            alert('error');
-            location.reload();
+          error: function(err) {
+            console.log(err);
           }
         });
         return false;
       }
+
+      $(document).ready(function(){
+        $("#signup").click(function(){
+          console.log(token);
+          $.ajax({
+            type: 'GET',
+            url: '/',
+            type: "GET",
+            beforeSend: function(xhr){xhr.setRequestHeader('x-access-token', token);},
+            success: function() { alert('Success!' + authHeader); }
+          });
+        });
+      });
     </script>
   </body>
 </html>
