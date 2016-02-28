@@ -5,7 +5,13 @@ var teamSchema = new Schema({
 	/* Data */
 	name : String,
 	users: [String],
-	reminders: [],
+	reminders: [{
+		title : {type : String},
+		type : {type : Number},
+		triggerTime : {type : Date},
+		chill : {type : Boolean},
+		active : {type : Boolean}
+	}],
 	messagesReadBy: [String],
     miniMarvinId: String,
     createdAt: Date,
@@ -24,6 +30,7 @@ teamSchema.pre('save', function(next) {
 
 //Indexes
 teamSchema.index({ name: 1 });
+teamSchema.index({ miniMarvinId: 1 });
 
 //Create & export the model
 var Team = mongoose.model('Team', teamSchema);

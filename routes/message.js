@@ -7,42 +7,36 @@ var rp = require('request-promise');
 
 // Get all messages of a team
 router.get('/:teamId', function(req, res, next) {
-	if (!req.params.teamId) res.json(response.error(new MarvinError(response.errorTypes.incorrectParameters)));
+	if (req.params.teamId) {
+		var teamQuery = Team.findOne({ '_id' : req.params.teamId });
+		var messageQuery = Message.find({ 'teamId' : req.params.teamId }).select('_id text from createdAt').sort({ createdAt : -1 });
 
-	var teamQuery = Team.findOne({ '_id' : req.params.teamId }).exec();
-	var messageQuery = Message.find({ 'teamId' : req.params.teamId }).exec();
-
-	Promise.all([teamQuery, messageQuery])
-	.then(function(team, messages) {
-		if(team) {
-			if(team.users.indexOf(req.decoded._doc._id) === -1) res.json(response.error(new MarvinError(response.errorTypes.accessDenied)));
-			else if (team.messagesReadBy.indexOf(req.decoded._doc._id) >= 0) return [team, messages];
-			else {
-				team.messagesReadBy.push(req.decoded._doc._id);
-				return [team.save(), messages];
-			}
-		}
-		else {
-			res.json(response.error(new MarvinError(response.errorTypes.notFound)));
-		}
-	})
-	.spread(function(team, messages) {
-		res.json(response.success(messages));
-	})
-	.catch(function(err) {
-		res.json(response.error(new MarvinError(response.errorTypes.internalServerError)));
-	});
+		teamQuery.exec()
+		.then(function(team) {
+			if (!team) throw new MarvinError(response.errorTypes.notFound);
+			else if (team.users.indexOf(req.decoded._doc._id) < 0) throw new MarvinError(response.errorTypes.accessDenied);
+			else return messageQuery.exec();
+		})
+		.then(function(messages) {
+			res.json(response.success(messages));
+		})
+		.catch(function(err) {
+			res.json(response.error(err));
+		});
+	}
+	else {
+		res.json(response.error(new MarvinError(response.errorTypes.incorrectParameters)));
+	}
 });
 
 // New message to team chat
 router.post('/:teamId', function(req, res, next) {
-	if (!req.body.text) res.json(response.error(new MarvinError(response.errorTypes.incorrectParameters)));
+	if (req.body.text) {
+		var query = Team.findOne({ '_id' : req.params.teamId }).exec();
 
-	var query = Team.findOne({ '_id' : req.params.teamId }).exec();
-
-	query.then(function(team) {
-		if(team) {
-			if(team.users.indexOf(req.decoded._doc._id) === -1) res.json(response.error(new MarvinError(response.errorTypes.accessDenied)));
+		query.then(function(team) {
+			if (!team) throw new MarvinError(response.errorTypes.notFound);
+			else if(team.users.indexOf(req.decoded._doc._id) < 0) throw new MarvinError(response.errorTypes.accessDenied);
 			else {
 				team.messagesReadBy = [req.decoded._doc._id];
 				var message = new Message({
@@ -52,17 +46,17 @@ router.post('/:teamId', function(req, res, next) {
 				});
 				return [team.save(), message.save()];
 			}
-		}
-		else {
-			res.json(response.error(new MarvinError(response.errorTypes.notFound)));
-		}
-	})
-	.spread(function(team, message) {
-		res.json(response.success({'_id': message._id, 'text': message.text, 'from': message.from, 'createdAt': message.createdAt}));
-	})
-	.catch(function(err) {
-		res.json(response.error(new MarvinError(response.errorTypes.internalServerError)));
-	});
+		})
+		.spread(function(team, message) {
+			res.json(response.success({'_id': message._id, 'text': message.text, 'from': message.from, 'createdAt': message.createdAt}));
+		})
+		.catch(function(err) {
+			res.json(response.error(err));
+		});
+	}
+	else {
+		res.json(response.error(new MarvinError(response.errorTypes.incorrectParameters)));
+	}
 });
 
 module.exports = router;

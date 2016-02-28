@@ -1,3 +1,5 @@
+var env = require('../config').env;
+
 exports.errorTypes = errorTypes();
 exports.MarvinError = MarvinError;
 
@@ -17,6 +19,7 @@ exports.success = function(data) {
 };
 
 exports.error = function(err) {
+	//if (env !== 'production') console.log(err.stack);
 	var response = newResponse();
 	response.code = err.code;
 	response.message = err.message;
@@ -61,9 +64,9 @@ function errorTypes() {
 }
 
 function MarvinError(err) {
-	this.code = err.code;
-    this.message = err.message;
-	this.stack = (new Error()).stack;
+	this.code = err.code || 500;
+    this.message = err.message || 'Internal server error.';
+	Error.captureStackTrace(this, MarvinError);
 }
-EventoiError.prototype = Object.create(Error.prototype);
-EventoiError.prototype.constructor = EventoiError;
+MarvinError.prototype = Object.create(Error.prototype);
+MarvinError.prototype.constructor = MarvinError;

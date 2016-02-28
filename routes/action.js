@@ -1,3 +1,4 @@
+var _ = require('underscore');
 var router = require('express').Router();
 var User = require('../models').User;
 var Team = require('../models').Team;
@@ -8,53 +9,48 @@ var MarvinError = response.MarvinError;
 
 // Get all of the teams that user who has requested this function is involved
 router.get('/enterRegion/:miniMarvinId', function(req, res, next) {
-	var query = Team.findOne({ miniMarvinId : req.params.miniMarvinId }).exec();
+	var query = Team.find({ users : req.decoded._doc._id }).exec();
 
-	query.then(function(team) {
-		console.log(team);
-		if(team.users.indexOf(req.decoded._doc._id) !== -1) {
-			var result = [];
-			for(var i = 0; i < team.reminders.length; ++i) {
-				console.log(i);
-				console.log(team.reminders[i]);
-				console.log(team.reminders[i].active);
-				console.log(team.reminders[i].active == "true");
-				if(team.reminders[i].active === "true" && team.reminders[i].type === 0) result.push(team.reminders[i]);
-			}
-			res.json(response.success(result));
-		}
+	query.then(function(teams) {
+		if (!teams) throw new MarvinError(response.errorTypes.notFound);
 		else {
-			res.json(response.success([]));
+			var result = [];
+			_.each(teams, function(team) {
+				if (team.miniMarvinId === req.params.miniMarvinId) {
+					_.each(team.reminders, function (reminder) {
+						if (reminder.active === true && reminder.type === 0) result.push(reminder);
+					});
+				}
+			});
+			res.json(response.success(result));
 		}
 	})
 	.catch(function(err) {
-		res.json(response.error(new MarvinError(response.errorTypes.internalServerError)));
+		res.json(response.error(err));
 	});
 });
 
 // Get all of the teams that user who has requested this function is involved
 router.get('/exitRegion/:miniMarvinId', function(req, res, next) {
-	var query = Team.findOne({ miniMarvinId : req.params.miniMarvinId }).exec();
+	var query = Team.find({ users : req.decoded._doc._id }).exec();
 
-	query.then(function(team) {
-		console.log(team);
-		if(team.users.indexOf(req.decoded._doc._id) !== -1) {
-			var result = [];
-			for(var i = 0; i < team.reminders.length; ++i) {
-				console.log(i);
-				console.log(team.reminders[i]);
-				console.log(team.reminders[i].active);
-				console.log(team.reminders[i].active == "true");
-				if(team.reminders[i].active === "true" && team.reminders[i].type === 1) result.push(team.reminders[i]);
-			}
-			res.json(response.success(result));
-		}
+	query.then(function(teams) {
+		if (!teams) throw new MarvinError(response.errorTypes.notFound);
 		else {
-			res.json(response.success([]));
+			var result = [];
+			_.each(teams, function(team) {
+				if (team.miniMarvinId === req.params.miniMarvinId) {
+					if (team.users.indexOf(req.decoded._doc._id) < 0) throw new MarvinError(response.errorTypes.accessDenied);
+					_.each(team.reminders, function (reminder) {
+						if (reminder.active === true && reminder.type === 1) result.push(reminder);
+					});
+				}
+			});
+			res.json(response.success(result));
 		}
 	})
 	.catch(function(err) {
-		res.json(response.error(new MarvinError(response.errorTypes.internalServerError)));
+		res.json(response.error(err));
 	});
 });
 
