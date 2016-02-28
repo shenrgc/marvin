@@ -3,13 +3,14 @@ var router = require('express').Router();
 var jwt = require('jsonwebtoken');
 var User = require('../models').User;
 var response = require('../utils').response;
+var MarvinError = response.MarvinError;
 
 router.post('/email', function(req, res, next) {
 	var email = req.body.email;
 	var password = req.body.password;
 
 	if (!email || !password) {
-		res.json(response.error(response.errorTypes.incorrectParameters));
+		res.json(response.error(new MarvinError(response.errorTypes.incorrectParameters)));
 	}
 
 	var query = User.findOne({
@@ -18,7 +19,7 @@ router.post('/email', function(req, res, next) {
 
 	query.then(function(user) {
 		if (!user) {
-			res.json(response.error(response.errorTypes.userNotFound));
+			res.json(response.error(new MarvinError(response.errorTypes.notFound)));
 		} else if (user.password) {
 			if (user.validPassword(password)) {
 				//A - OK
@@ -29,11 +30,14 @@ router.post('/email', function(req, res, next) {
 
 				res.json(response.success({ 'token' : token }));
 			} else {
-				res.json(response.error(response.errorTypes.wrongPassword));
+				res.json(response.error(new MarvinError(response.errorTypes.wrongPassword)));
 			}
 		} else {
-			res.json(response.error(response.errorTypes.userNotFound));
+			res.json(response.error(new MarvinError(response.errorTypes.notFound)));
 		}
+	})
+	.catch(function(err) {
+		res.json(response.error(new MarvinError(response.errorTypes.internalServerError)));
 	});
 });
 

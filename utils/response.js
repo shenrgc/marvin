@@ -1,3 +1,6 @@
+exports.errorTypes = errorTypes();
+exports.MarvinError = MarvinError;
+
 function newResponse() {
 	return {
 		"code": null,
@@ -5,6 +8,20 @@ function newResponse() {
 	    "data": {}
 	};
 }
+
+exports.success = function(data) {
+	var response = newResponse();
+	response.code = 200;
+	response.data = data;
+	return response;
+};
+
+exports.error = function(err) {
+	var response = newResponse();
+	response.code = err.code;
+	response.message = err.message;
+	return response;
+};
 
 function errorTypes() {
 	return {
@@ -32,6 +49,10 @@ function errorTypes() {
 			code : 403,
 			message : 'Access denied.'
 		},
+		emailInUse : {
+			code : 403,
+			message : 'Email already in use.'
+		},
 		internalServerError : {
 			code : 500,
 			message : 'Internal server error. Fancy trying again in a minute or so?'
@@ -39,25 +60,10 @@ function errorTypes() {
 	};
 }
 
-exports.success = function(data) {
-	var response = newResponse();
-	response.code = 200;
-	response.data = data;
-	return response;
-};
-
-exports.error = function(code, msg) {
-	var response = newResponse();
-
-	if (!msg) {
-		response.code = code;
-		response.message = msg;
-	} else {
-		response.code = errorTypes()[code].code;
-		response.message = errorTypes()[code].message;
-	}
-
-	return response;
-};
-
-exports.errorTypes = errorTypes();
+function MarvinError(err) {
+	this.code = err.code;
+    this.message = err.message;
+	this.stack = (new Error()).stack;
+}
+EventoiError.prototype = Object.create(Error.prototype);
+EventoiError.prototype.constructor = EventoiError;

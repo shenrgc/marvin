@@ -1,15 +1,13 @@
-var config = require('../config');
 var router = require('express').Router();
-var jwt = require('jsonwebtoken');
 var User = require('../models').User;
 var Team = require('../models').Team;
-var authenticated = require('../middleware').authenticated;
 var response = require('../utils').response;
+var MarvinError = response.MarvinError;
 
 // Possible actions
 
 // Get all of the teams that user who has requested this function is involved
-router.get('/enterRegion/:miniMarvinId', authenticated, function(req, res, next) {
+router.get('/enterRegion/:miniMarvinId', function(req, res, next) {
 	var query = Team.findOne({ miniMarvinId : req.params.miniMarvinId }).exec();
 
 	query.then(function(team) {
@@ -28,14 +26,14 @@ router.get('/enterRegion/:miniMarvinId', authenticated, function(req, res, next)
 		else {
 			res.json(response.success([]));
 		}
-	}).catch(function(err) {
-		console.log(err);
-		res.json(response.error(response.errorTypes.internalServerError));
+	})
+	.catch(function(err) {
+		res.json(response.error(new MarvinError(response.errorTypes.internalServerError)));
 	});
 });
 
 // Get all of the teams that user who has requested this function is involved
-router.get('/exitRegion/:miniMarvinId', authenticated, function(req, res, next) {
+router.get('/exitRegion/:miniMarvinId', function(req, res, next) {
 	var query = Team.findOne({ miniMarvinId : req.params.miniMarvinId }).exec();
 
 	query.then(function(team) {
@@ -54,9 +52,9 @@ router.get('/exitRegion/:miniMarvinId', authenticated, function(req, res, next) 
 		else {
 			res.json(response.success([]));
 		}
-	}).catch(function(err) {
-		console.log(err);
-		res.json(response.error(response.errorTypes.internalServerError));
+	})
+	.catch(function(err) {
+		res.json(response.error(new MarvinError(response.errorTypes.internalServerError)));
 	});
 });
 
